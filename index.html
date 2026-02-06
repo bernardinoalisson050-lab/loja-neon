@@ -1,113 +1,118 @@
-import React, { useState, useEffect } from "react"; import { Card, CardContent } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { motion } from "framer-motion"; import { Search, Plus, Trash2 } from "lucide-react";
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EclipseBuxx</title>
 
-export default function NeonStore() { const [products, setProducts] = useState([]); const [search, setSearch] = useState(""); const [name, setName] = useState(""); const [price, setPrice] = useState("");
-
-// carregar produtos salvos useEffect(() => { const saved = localStorage.getItem("neon_products"); if (saved) setProducts(JSON.parse(saved)); }, []);
-
-// salvar produtos useEffect(() => { localStorage.setItem("neon_products", JSON.stringify(products)); }, [products]);
-
-function addProduct() { if (!name || !price) return;
-
-const newProduct = { name, price };
-setProducts([...products, newProduct]);
-
-setName("");
-setPrice("");
-
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#000;
+color:#fff;
 }
 
-function removeProduct(index) { const updated = products.filter((_, i) => i !== index); setProducts(updated); }
-
-function buy(product) { const pix = "SEU_PIX_AQUI"; // coloque sua chave pix const text = Olá, quero comprar: ${product.name} - R$ ${product.price};
-
-window.open(
-  `https://wa.me/?text=${encodeURIComponent(text + "\nPIX: " + pix)}`,
-  "_blank"
-);
-
+header{
+text-align:center;
+padding:20px;
+font-size:28px;
+color:#b026ff;
+font-weight:bold;
 }
 
-const filtered = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) );
+.container{padding:20px;}
 
-return ( <div className="min-h-screen bg-black text-white p-6"> {/* título */} <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-bold text-center mb-6 text-purple-400" > EclipseBuxx </motion.h1>
+.card{
+background:#111;
+border:1px solid #b026ff;
+border-radius:16px;
+padding:15px;
+margin-bottom:15px;
+}
 
-{/* busca */}
-  <div className="flex items-center gap-2 bg-zinc-900 rounded-2xl p-3 mb-6">
-    <Search className="text-purple-400" />
-    <input
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      placeholder="Buscar produtos..."
-      className="bg-transparent outline-none w-full"
-    />
-  </div>
+.price{color:#b026ff;font-weight:bold;}
 
-  {/* painel admin */}
-  <div className="bg-zinc-900 p-4 rounded-2xl mb-6 border border-purple-500">
-    <h2 className="text-xl mb-3 font-semibold">Painel Admin</h2>
+button{
+width:100%;
+padding:10px;
+border:none;
+border-radius:10px;
+background:#b026ff;
+color:#fff;
+font-weight:bold;
+margin-top:10px;
+}
 
-    <div className="flex flex-col gap-2">
-      <input
-        placeholder="Nome do produto"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="p-2 rounded bg-black border border-purple-500"
-      />
+.admin{
+background:#111;
+padding:15px;
+margin:20px;
+border-radius:16px;
+border:1px solid #b026ff;
+}
+</style>
+</head>
 
-      <input
-        placeholder="Preço"
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
-        className="p-2 rounded bg-black border border-purple-500"
-      />
+<body>
 
-      <Button
-        onClick={addProduct}
-        className="bg-purple-600 hover:bg-purple-700 rounded-xl flex gap-2"
-      >
-        <Plus size={18} /> Adicionar Produto
-      </Button>
-    </div>
-  </div>
+<header>EclipseBuxx</header>
 
-  {/* lista de produtos */}
-  <div className="grid md:grid-cols-3 gap-4">
-    {filtered.map((product, index) => (
-      <motion.div
-        key={index}
-        whileHover={{ scale: 1.05 }}
-        transition={{ type: "spring", stiffness: 200 }}
-      >
-        <Card className="bg-zinc-900 border border-purple-500 rounded-2xl shadow-lg">
-          <CardContent className="p-4 flex flex-col gap-3">
-            <h2 className="text-xl font-semibold">{product.name}</h2>
-            <p className="text-purple-400 font-bold">R$ {product.price}</p>
-
-            <div className="flex gap-2">
-              <Button
-                onClick={() => buy(product)}
-                className="bg-purple-600 hover:bg-purple-700 rounded-xl w-full"
-              >
-                Comprar
-              </Button>
-
-              <Button
-                onClick={() => removeProduct(index)}
-                className="bg-red-600 hover:bg-red-700 rounded-xl"
-              >
-                <Trash2 size={16} />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    ))}
-  </div>
-
-  {/* rodapé */}
-  <p className="text-center text-zinc-500 mt-10">
-    © {new Date().getFullYear()} EclipseBuxx - Todos os direitos reservados
-  </p>
+<div class="admin">
+<h3>Painel Admin</h3>
+<input id="name" placeholder="Nome do produto"><br><br>
+<input id="price" placeholder="Preço"><br><br>
+<button onclick="addProduct()">Adicionar</button>
 </div>
 
-); }
+<div class="container" id="list"></div>
+
+<script>
+let products = JSON.parse(localStorage.getItem("produtos") || "[]");
+
+function save(){
+localStorage.setItem("produtos", JSON.stringify(products));
+render();
+}
+
+function addProduct(){
+const name = document.getElementById("name").value;
+const price = document.getElementById("price").value;
+if(!name || !price) return;
+
+products.push({name, price});
+save();
+}
+
+function buy(p){
+const pix = "SUA_CHAVE_PIX";
+const msg = `Quero comprar ${p.name} - R$ ${p.price} | PIX: ${pix}`;
+window.open("https://wa.me/?text=" + encodeURIComponent(msg));
+}
+
+function remove(i){
+products.splice(i,1);
+save();
+}
+
+function render(){
+const list = document.getElementById("list");
+list.innerHTML = "";
+
+products.forEach((p,i)=>{
+list.innerHTML += `
+<div class="card">
+<h3>${p.name}</h3>
+<p class="price">R$ ${p.price}</p>
+<button onclick='buy(${JSON.stringify(p)})'>Comprar</button>
+<button onclick="remove(${i})" style="background:red;margin-top:5px;">Excluir</button>
+</div>
+`;
+});
+}
+
+render();
+</script>
+
+</body>
+</html>
