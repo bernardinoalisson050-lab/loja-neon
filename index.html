@@ -1,67 +1,113 @@
-<!DOCTYPE html><html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EclipseBuxx</title><style>
-body{
-margin:0;
-font-family:Arial, sans-serif;
-background:#000;
-color:#fff;
+import React, { useState, useEffect } from "react"; import { Card, CardContent } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { motion } from "framer-motion"; import { Search, Plus, Trash2 } from "lucide-react";
+
+export default function NeonStore() { const [products, setProducts] = useState([]); const [search, setSearch] = useState(""); const [name, setName] = useState(""); const [price, setPrice] = useState("");
+
+// carregar produtos salvos useEffect(() => { const saved = localStorage.getItem("neon_products"); if (saved) setProducts(JSON.parse(saved)); }, []);
+
+// salvar produtos useEffect(() => { localStorage.setItem("neon_products", JSON.stringify(products)); }, [products]);
+
+function addProduct() { if (!name || !price) return;
+
+const newProduct = { name, price };
+setProducts([...products, newProduct]);
+
+setName("");
+setPrice("");
+
 }
 
-header{
-text-align:center;
-padding:20px;
-font-size:28px;
-font-weight:bold;
-color:#b026ff;
+function removeProduct(index) { const updated = products.filter((_, i) => i !== index); setProducts(updated); }
+
+function buy(product) { const pix = "SEU_PIX_AQUI"; // coloque sua chave pix const text = Olá, quero comprar: ${product.name} - R$ ${product.price};
+
+window.open(
+  `https://wa.me/?text=${encodeURIComponent(text + "\nPIX: " + pix)}`,
+  "_blank"
+);
+
 }
 
-.container{
-padding:20px;
-}
+const filtered = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) );
 
-.card{
-background:#111;
-border:1px solid #b026ff;
-border-radius:16px;
-padding:15px;
-margin-bottom:15px;
-}
+return ( <div className="min-h-screen bg-black text-white p-6"> {/* título */} <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-bold text-center mb-6 text-purple-400" > EclipseBuxx </motion.h1>
 
-.price{
-color:#b026ff;
-font-weight:bold;
-}
+{/* busca */}
+  <div className="flex items-center gap-2 bg-zinc-900 rounded-2xl p-3 mb-6">
+    <Search className="text-purple-400" />
+    <input
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      placeholder="Buscar produtos..."
+      className="bg-transparent outline-none w-full"
+    />
+  </div>
 
-button{
-width:100%;
-padding:10px;
-border:none;
-border-radius:10px;
-background:#b026ff;
-color:#fff;
-font-weight:bold;
-margin-top:10px;
-}
+  {/* painel admin */}
+  <div className="bg-zinc-900 p-4 rounded-2xl mb-6 border border-purple-500">
+    <h2 className="text-xl mb-3 font-semibold">Painel Admin</h2>
 
-footer{
-text-align:center;
-color:#666;
-padding:20px;
-}
-</style></head><body><header>EclipseBuxx</header><div class="container"><div class="card">
-<h3>Conta Blox Fruits</h3>
-<p class="price">R$ 25,00</p>
-<button>Comprar</button>
-</div><div class="card">
-<h3>Fruta Rara</h3>
-<p class="price">R$ 15,00</p>
-<button>Comprar</button>
-</div><div class="card">
-<h3>Gamepass Especial</h3>
-<p class="price">R$ 40,00</p>
-<button>Comprar</button>
-</div></div><footer>© 2026 EclipseBuxx</footer></body>
-</html>
+    <div className="flex flex-col gap-2">
+      <input
+        placeholder="Nome do produto"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="p-2 rounded bg-black border border-purple-500"
+      />
+
+      <input
+        placeholder="Preço"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+        className="p-2 rounded bg-black border border-purple-500"
+      />
+
+      <Button
+        onClick={addProduct}
+        className="bg-purple-600 hover:bg-purple-700 rounded-xl flex gap-2"
+      >
+        <Plus size={18} /> Adicionar Produto
+      </Button>
+    </div>
+  </div>
+
+  {/* lista de produtos */}
+  <div className="grid md:grid-cols-3 gap-4">
+    {filtered.map((product, index) => (
+      <motion.div
+        key={index}
+        whileHover={{ scale: 1.05 }}
+        transition={{ type: "spring", stiffness: 200 }}
+      >
+        <Card className="bg-zinc-900 border border-purple-500 rounded-2xl shadow-lg">
+          <CardContent className="p-4 flex flex-col gap-3">
+            <h2 className="text-xl font-semibold">{product.name}</h2>
+            <p className="text-purple-400 font-bold">R$ {product.price}</p>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={() => buy(product)}
+                className="bg-purple-600 hover:bg-purple-700 rounded-xl w-full"
+              >
+                Comprar
+              </Button>
+
+              <Button
+                onClick={() => removeProduct(index)}
+                className="bg-red-600 hover:bg-red-700 rounded-xl"
+              >
+                <Trash2 size={16} />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    ))}
+  </div>
+
+  {/* rodapé */}
+  <p className="text-center text-zinc-500 mt-10">
+    © {new Date().getFullYear()} EclipseBuxx - Todos os direitos reservados
+  </p>
+</div>
+
+); }
